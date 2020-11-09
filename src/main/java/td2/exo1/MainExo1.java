@@ -1,9 +1,6 @@
 package td2.exo1;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-public class App {
+public class MainExo1 {
 
 // Réponse à la question 1 (Comparaison entre Somme et Sommable) :
 // l'interface Sommable prend un seul parametre et l'aditionne avec la source alors que
@@ -18,7 +15,7 @@ public class App {
 
         System.out.println(sInt.sommer(10, 15));
         System.out.println(sDouble.sommer(11.50, 13.80));
-        System.out.println(sString.sommer("exercice " ,"question1"));
+        System.out.println(sString.sommer("exercice " ,"question 1"));
         System.out.println(sLong.sommer(10l, 15l));
     }
 }

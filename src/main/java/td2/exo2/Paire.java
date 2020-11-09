@@ -1,4 +1,4 @@
-package td2.exo1;
+package td2.exo2;
 
 public class Paire<T,U> {
     public T fst;

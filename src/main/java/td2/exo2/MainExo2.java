@@ -1,10 +1,12 @@
-package td2.exo1;
+package td2.exo2;
+
+import td2.exo2.Paire;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
-public class Exo2 {
+public class MainExo2 {
 
     public static <T> List<T> filtragePredicatif(List<Predicate<T>> predicates, List<T> elements) {
         List<T> l = new ArrayList<>();
