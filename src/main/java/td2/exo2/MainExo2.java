@@ -1,7 +1,5 @@
 package td2.exo2;
 
-import td2.exo2.Paire;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
