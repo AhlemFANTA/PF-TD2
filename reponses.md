@@ -1,4 +1,4 @@
-## Réponse Exercice 1 
+## Réponse -> Exercice 1 
 
 ##### Réponse à la question 1 (Comparaison entre Somme et Sommable) :
 * L'interface Sommable prend un seul parametre et l'aditionne avec la source alors que l'interface Somme prend les 2 arguments à sommer.
@@ -26,7 +26,7 @@ Stockage de lambda expression : signature (T)  R
 
 
 
-## Réponse Exercice 3 (Etude de cas)
+## Réponse -> Exercice 3 (Etude de cas)
 * Nb : pour visualiser le résulat veuillez exécuter le main qui se trouve dans la classe MainExo3
 ##### Réponse 1 
 ```java

@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+// voir reponses.md
 public class MainExo3 {
 
     private static Matiere m1;
