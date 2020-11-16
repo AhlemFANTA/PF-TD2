@@ -10,6 +10,7 @@ public class UE {
         this.nom = nom;
         this.ects = ects;
     }
+
     public String nom() {
         return nom;
     }

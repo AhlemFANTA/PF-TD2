@@ -30,13 +30,13 @@ Stockage de lambda expression : signature (T)  R
 * Nb : pour visualiser le résulat veuillez exécuter le main qui se trouve dans la classe MainExo3
 ##### Réponse 1 
 ```java
-public class Annee {
+public class MainExo3 {
     ....
 
     // Version 1 affichage avec une boucle for
-    public void afficheSi(String titre, Predicate<Etudiant> monPredicate) {
+    public static void afficheSi(Annee annee, String titre, Predicate<Etudiant> monPredicate) {
         System.out.println(titre);
-        for (Etudiant etudiant : etudiants) {
+        for (Etudiant etudiant : annee.etudiants()) {
             if (monPredicate.test(etudiant)) {
                 System.out.println(etudiant);
             }
@@ -44,14 +44,14 @@ public class Annee {
     }
 
     // Version 2 avec un consommateur
-    public void afficheSi2(String titre, Predicate<Etudiant> monConso) {
+    public static void afficheSi2(Annee annee,String titre, Predicate<Etudiant> monConso) {
         System.out.println(titre);
-        etudiants.forEach(etudiant -> {
+        annee.etudiants().forEach(etudiant -> {
             if (monConso.test(etudiant)) System.out.println(etudiant);
         });
     }
-    a1.afficheSi("**TOUS LES ETUDIANTS (afficheSi)", etudiant -> etudiant.notes().containsKey(m3));
-    a1.afficheSi2("**TOUS LES ETUDIANTS (afficheSi2) /forEach", etudiant -> etudiant.notes().containsKey(m3));
+    afficheSi(a1, "**TOUS LES ETUDIANTS (afficheSi)", etudiant -> etudiant.notes().containsKey(m3));
+    afficheSi2(a1, "**TOUS LES ETUDIANTS (afficheSi2) /forEach", etudiant -> etudiant.notes().containsKey(m3));
 }
 ```
 ##### Réponse 2
@@ -59,9 +59,8 @@ public class Annee {
 public class MainExo3 {
     ....
     //écrire un prédicat aDEF
-    private static final Predicate<Etudiant> aDEF = etudiant -> (etudiant.estDefaillant());
-    a1.afficheSi("Etudiant défaillant", aDEF);
-
+    private static final Predicate<Etudiant> aDEF = etudiant -> (estDefaillant(etudiant));
+    afficheSi(a1,"Etudiant défaillant", aDEF);
 }
 ```
 ##### Réponse 3
@@ -77,43 +76,41 @@ public class MainExo3 {
             }
         return false;
     };
-    a1.afficheSi("**ETUDIANTS AVEC NOTE ELIMINATOIRE", aNoteEliminatoire);
+    afficheSi(a1,"**ETUDIANTS AVEC NOTE ELIMINATOIRE", aNoteEliminatoire);
 }
 ```
 ##### Réponse 4
 ```java
 public class MainExo3 {
     ....
-    // question 4 - affichage moyenne 
-    a1.afficherMoyenne(aDEF);
-}
-```
-```java
-public class Annee {
-    ....
-    public void afficherMoyenne(Predicate<Etudiant> aDef) {
+    // question 4 - affichage moyenne en utilisant aDEF
+    afficherMoyenne(a1, aDEF);
+
+    public static void afficherMoyenne(Annee annee, Predicate<Etudiant> aDef) {
         System.out.println("**MOYENNE DES ETUDIANTS");
-        for (Etudiant etudiant : etudiants) {
+        for (Etudiant etudiant : annee.etudiants()) {
             if (aDef.test(etudiant)) System.out.println(etudiant.nom() + " ->null");
-            else System.out.println(etudiant.nom() + " -> moyenne -> " + etudiant.moyenne());
+            else System.out.println(etudiant.nom() + " -> moyenne -> " + moyenne(etudiant));
         }
     }
-}
-```
-```java
-public class Etudiant {
-    ....
-    public Double moyenne() {
-        if (estDefaillant()) return null;
-        Double n = matiereNotesCoef();
-        return n / sommeCoef();
+
+    /*
+    Question 4 : écrire une fonction moyenne qui calcule la moyenne d’un étudiant selon la règle donnée
+    On ne peut pas calculer de moyenne si l’étudiant est défaillant. Utiliser aDEF et retourner null dans
+    ce cas.
+     */
+
+    public static Double moyenne(Etudiant etudiant) {
+        if (estDefaillant(etudiant)) return null;
+        Double n = matiereNotesCoef(etudiant);
+        return n / sommeCoef(etudiant);
     }
 
-    public Boolean estDefaillant() {
-        for (UE ue : annee.ues()) {
+    public static Boolean estDefaillant(Etudiant etudiant) {
+        for (UE ue : etudiant.annee().ues()) {
             Set<Matiere> listeDeMatieres = ue.ects().keySet();
             for (Matiere matiere : listeDeMatieres) {
-                if (!notes().containsKey(matiere)) {
+                if (!etudiant.notes().containsKey(matiere)) {
                     return true;
                 }
             }
@@ -121,18 +118,18 @@ public class Etudiant {
         return false;
     }
 
-    private Double matiereNotesCoef() {
+    private static Double matiereNotesCoef(Etudiant etudiant) {
         double somme = 0.0;
 
-        for (Entry<Matiere, Double> couple : notes.entrySet()) {
-            Integer coef = coefMatiere(couple.getKey());
+        for (Entry<Matiere, Double> couple : etudiant.notes().entrySet()) {
+            Integer coef = coefMatiere(etudiant, couple.getKey());
             somme += couple.getValue() * coef;
         }
         return somme;
     }
 
-    private Integer coefMatiere(Matiere mat) {
-        for (UE ue : annee.ues()) {
+    private static Integer coefMatiere(Etudiant etudiant, Matiere mat) {
+        for (UE ue : etudiant.annee().ues()) {
             for (Entry<Matiere, Integer> couple : ue.ects().entrySet()) {
                 if (couple.getKey().equals(mat)) {
                     return couple.getValue();
@@ -142,14 +139,14 @@ public class Etudiant {
         return null;
     }
 
-    private double sommeCoef() {
-        double sommeCoef = 0;
-        for (UE ue : annee.ues()) {
-            for (Integer i : ue.ects().values()) {
-                sommeCoef += i;
+    private static double sommeCoef(Etudiant etudiant) {
+            double sommeCoef = 0;
+            for (UE ue : etudiant.annee().ues()) {
+                for (Integer i : ue.ects().values()) {
+                    sommeCoef += i;
+                }
             }
-        }
-        return sommeCoef;
+            return sommeCoef;
     }
 }
 ```
@@ -160,8 +157,8 @@ public class MainExo3 {
     //définir un prédicat naPasLaMoyennev1
     /* Quand on utilise ce predicat sur un etudiant défaillant il affiche un NullPointerException
      car un étudiant défaillant ne peut pas avoir de moyenne. */
-    private static final Predicate<Etudiant> naPasLaMoyennev1 = etudiant -> etudiant.moyenne() < 10;
-    a1.afficheSi("**ETUDIANTS SOUS LA MOYENNE", naPasLaMoyennev1);
+    private static final Predicate<Etudiant> naPasLaMoyennev1 = etudiant -> moyenne(etudiant) < 10;
+    afficheSi(a1, "**ETUDIANTS SOUS LA MOYENNE", naPasLaMoyennev1);
 }
 ```
 ##### Réponse 6
@@ -170,7 +167,7 @@ public class MainExo3 {
     ....
     //définir un prédicat naPasLaMoyennev2
     private static final Predicate<Etudiant> naPasLaMoyennev2 = aDEF.or(naPasLaMoyennev1);
-    a1.afficheSi("**ETUDIANTS SOUS LA MOYENNE", naPasLaMoyennev2);
+    afficheSi(a1,"**ETUDIANTS SOUS LA MOYENNE", naPasLaMoyennev2);
 }
 ```
 ##### Réponse 7
@@ -182,7 +179,7 @@ public class MainExo3 {
     Predicate <Etudiant> session2v1 = (naPasLaMoyennev1).or(aNoteEliminatoire).or(aDEF); // ordre indiqué dans l'énoncé
     Avec l'ordre ci-dessous j'ai la liste des etudiants en session 2 qui s'affiche correctement. */
     private static final Predicate<Etudiant> session2v1 = aDEF.or(naPasLaMoyennev1).or(aNoteEliminatoire);
-    a1.afficheSi("**ETUDIANTS EN SESSION 2 (v2)",session2v1);
+    afficheSi(a1,"**ETUDIANTS EN SESSION 2 (v2)", session2v1);
 }
 ```
 ##### Réponse 8
@@ -190,26 +187,26 @@ public class MainExo3 {
 public class MainExo3 {
     ....
     //écrire une fonction afficheSiv2
-     a1.afficheSiv2("**TOUS LES ETUDIANTS V2s /fonction de representation",etudiant -> etudiant.notes().containsKey(m3), Etudiant::toString);
-     a1.afficheSiv2("**TOUS LES ETUDIANTS V2s /fonction ad-hoc anonyme", etudiant -> etudiant.notes().containsKey(m3), new Function<Etudiant, String>() {
-         @Override
-         public String apply(Etudiant etudiant) {
-             if (etudiant.moyenne()==null) {
-                 return etudiant.getPrenom() + " " + etudiant.getNom() + " : " + "défaillant";
-             }else{
-                 return etudiant.getPrenom()  + " " + etudiant.getNom() + " : " + etudiant.moyenne();
-             }
-         }
-      });
+    afficheSiv2(a1,"**TOUS LES ETUDIANTS V2s /fonction de representation", etudiant -> etudiant.notes().containsKey(m3), Etudiant::toString);
+    afficheSiv2(a1,"**TOUS LES ETUDIANTS V2s /fonction ad-hoc anonyme", etudiant -> etudiant.notes().containsKey(m3), new Function<Etudiant, String>() {
+        @Override
+        public String apply(Etudiant etudiant) {
+            if (moyenne(etudiant) == null) {
+                return etudiant.prenom() + " " + etudiant.nom() + " : " + "défaillant";
+            } else {
+                return etudiant.prenom() + " " + etudiant.nom() + " : " + moyenne(etudiant);
+            }
+        }
+    });
 }
 ```
 ```java
-public class Annee {
+public class MainExo3 {
     ....
-    /* question 8 - amélioration de afficheSi */
-    public void afficheSiv2(String titre, Predicate<Etudiant> monConso, Function<Etudiant, String> formateur) {
+    /* amélioration de afficheSi */
+    public static void afficheSiv2(Annee annee, String titre, Predicate<Etudiant> monConso, Function<Etudiant, String> formateur) {
         System.out.println(titre);
-        etudiants.forEach(etudiant -> {
+        annee.etudiants().forEach(etudiant -> {
             if (monConso.test(etudiant)) {
                 String s = formateur.apply(etudiant);
                 System.out.println(s);
@@ -223,52 +220,12 @@ public class Annee {
 public class MainExo3 {
     ....
     //écrire une fonction moyenneIndicative
-    a1.afficheSiv2("**TOUS LES ETUDIANTS V2s",etudiant -> etudiant.notes().containsKey(m3), new Function<Etudiant, String>() {
+    afficheSiv2(a1,"**TOUS LES ETUDIANTS V2s", etudiant -> etudiant.notes().containsKey(m3), new Function<Etudiant, String>() {
         @Override
         public String apply(Etudiant etudiant) {
-                return etudiant.getPrenom()  + " " + etudiant.getNom() + " : " + etudiant.moyenneIndicative();
-            }
+            return etudiant.prenom() + " " + etudiant.nom() + " : " + moyenneIndicative(etudiant);
+        }
     });
-}
-```
-```java
-public class Etudiant {
-    ....
-    public Double moyenneIndicative() {
-        Double n = matiereNotesCoef();
-        return n / sommeCoef();
-    }
-
-    private Double matiereNotesCoef() {
-        double somme = 0.0;
-
-        for (Entry<Matiere, Double> couple : notes.entrySet()) {
-            Integer coef = coefMatiere(couple.getKey());
-            somme += couple.getValue() * coef;
-        }
-        return somme;
-    }
-
-    private Integer coefMatiere(Matiere mat) {
-        for (UE ue : annee.ues()) {
-            for (Entry<Matiere, Integer> couple : ue.ects().entrySet()) {
-                if (couple.getKey().equals(mat)) {
-                    return couple.getValue();
-                }
-            }
-        }
-        return null;
-    }
-
-    private double sommeCoef() {
-        double sommeCoef = 0;
-        for (UE ue : annee.ues()) {
-            for (Integer i : ue.ects().values()) {
-                sommeCoef += i;
-            }
-        }
-        return sommeCoef;
-    }
 }
 ```
 ##### Réponse 10
@@ -280,19 +237,19 @@ public class MainExo3 {
         return etudiant -> calculMoyenne.apply(etudiant) < 10;
     }
 
-    a1.afficheSiv2("**TOUS LES ETUDIANTS SOUS LA MOYENNE INDICATIVE", naPasLaMoyenneGeneralisee(Etudiant::moyenneIndicative), new Function<Etudiant, String>() {
-        @Override
-        public String apply(Etudiant etudiant) {
-            return etudiant.getPrenom() + " " + etudiant.getNom() + " : " + etudiant.moyenneIndicative();
-        }
-    });
-    e2.noter(m1, 20.0);
-    e2.noter(m3, 20.0);
-    a1.afficheSiv2("**TOUS LES ETUDIANTS SOUS LA MOYENNE INDICATIVE", naPasLaMoyenneGeneralisee(Etudiant::moyenneIndicative), new Function<Etudiant, String>() {
-        @Override
-        public String apply(Etudiant etudiant) {
-            return etudiant.getPrenom() + " " + etudiant.getNom() + " : " + etudiant.moyenneIndicative();
-        }
-    });
+    afficheSiv2(a1,"**TOUS LES ETUDIANTS SOUS LA MOYENNE INDICATIVE", naPasLaMoyenneGeneralisee(MainExo3::moyenneIndicative), new Function<Etudiant, String>() {
+            @Override
+            public String apply(Etudiant etudiant) {
+                return etudiant.prenom() + " " + etudiant.nom() + " : " + moyenneIndicative(etudiant);
+            }
+        });
+        e2.noter(m1, 20.0);
+        e2.noter(m3, 20.0);
+        afficheSiv2(a1,"**TOUS LES ETUDIANTS SOUS LA MOYENNE INDICATIVE", naPasLaMoyenneGeneralisee(MainExo3::moyenneIndicative), new Function<Etudiant, String>() {
+            @Override
+            public String apply(Etudiant etudiant) {
+                return etudiant.prenom() + " " + etudiant.nom() + " : " + moyenneIndicative(etudiant);
+            }
+        });
 }
 ```
